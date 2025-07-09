@@ -1,4 +1,10 @@
 import streamlit as st
+import subprocess
+
+st.write("Installed packages:")
+st.code(subprocess.getoutput("pip list"))
+
+import streamlit as st
 import joblib
 import numpy as np
 
