@@ -4,13 +4,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# ------------------- Custom Styling -------------------
+# ------------------- Custom Dark Theme Styling -------------------
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: #f0f2f6;
+        background-color: #121212;
+        color: #ffffff;
         font-family: 'Segoe UI', sans-serif;
+    }
+    .css-1cpxqw2 edgvbvh3 {
+        background-color: #1e1e1e;
+    }
+    h1, h2, h3, h4 {
+        color: #ffffff;
+    }
+    .stButton > button {
+        background-color: #1f77b4;
+        color: white;
+        border-radius: 5px;
     }
     </style>
     """,
@@ -20,18 +32,18 @@ st.markdown(
 # ------------------- Sidebar Info -------------------
 st.sidebar.title("📘 About the App")
 st.sidebar.markdown("""
-This app predicts **Air Quality Index (AQI)** using a trained machine learning model.
+This app predicts **Air Quality Index (AQI)** using a machine learning model.
 
 ### Inputs
-- PM2.5, PM10 (particulate matter)
+- PM2.5, PM10 (Particulate matter)
 - Gases: NO, NO2, CO, SO2, O3
 
 ### Output
-- AQI value
-- Air quality category
-- Health advice
-- Pie chart of pollutant contribution
-- Downloadable report
+- AQI Value
+- Air Quality Category
+- Health Advice
+- Pollutant Pie Chart
+- Downloadable Report
 """)
 
 # ------------------- Load Model -------------------
@@ -41,10 +53,10 @@ model = joblib.load("aqi_rf_best.pkl")
 st.title("🌫️ Air Quality Index (AQI) Predictor")
 
 # ------------------- Input Fields -------------------
-st.subheader("📥 Enter Pollutant Values")
+st.subheader("📥 Enter Pollutant Levels")
 
 pm25 = st.number_input("PM2.5 (μg/m³)", min_value=0.0, help="Fine particulate matter")
-pm10 = st.number_input("PM10 (μg/m³)", min_value=0.0, help="Coarse dust particles")
+pm10 = st.number_input("PM10 (μg/m³)", min_value=0.0, help="Coarse particulate matter")
 no = st.number_input("NO (ppb)", min_value=0.0)
 no2 = st.number_input("NO2 (ppb)", min_value=0.0)
 co = st.number_input("CO (mg/m³)", min_value=0.0)
@@ -57,12 +69,15 @@ st.subheader("📊 Pollutant Distribution")
 labels = ['PM2.5', 'PM10', 'NO', 'NO2', 'CO', 'SO2', 'O3']
 values = [pm25, pm10, no, no2, co, so2, o3]
 
-fig, ax = plt.subplots()
-ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90)
-ax.axis('equal')
-st.pyplot(fig)
+if sum(values) > 0:
+    fig, ax = plt.subplots(facecolor='#121212')
+    ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90, textprops={'color': 'white'})
+    ax.axis('equal')
+    st.pyplot(fig)
+else:
+    st.warning("⚠️ Please enter pollutant values to display the chart.")
 
-# ------------------- AQI Category Logic -------------------
+# ------------------- AQI Category Function -------------------
 def get_aqi_category(aqi):
     if aqi <= 50:
         return "Good", "Air quality is satisfactory. No precautions needed."
@@ -73,16 +88,15 @@ def get_aqi_category(aqi):
     elif aqi <= 200:
         return "Unhealthy", "Wear a mask and avoid prolonged outdoor activity."
     elif aqi <= 300:
-        return "Very Unhealthy", "Everyone should avoid outdoor activity. Wear a high-quality mask."
+        return "Very Unhealthy", "Everyone should avoid outdoor activity. Use air purifiers and masks."
     else:
-        return "Hazardous", "Stay indoors. Use air purifiers. Seek medical help if needed."
+        return "Hazardous", "Stay indoors. Serious health effects possible. Seek medical help if needed."
 
 # ------------------- Prediction -------------------
 if st.button("🔮 Predict AQI"):
     input_data = np.array([[pm25, pm10, no, no2, co, so2, o3]])
     prediction = model.predict(input_data)
     aqi_value = int(prediction[0])
-
     category, advice = get_aqi_category(aqi_value)
 
     st.success(f"✅ Predicted AQI: {aqi_value} ({category})")
@@ -96,5 +110,6 @@ if st.button("🔮 Predict AQI"):
     })
 
     st.download_button("📥 Download Report as CSV", result.to_csv(index=False), "aqi_report.csv", "text/csv")
+
 
 
