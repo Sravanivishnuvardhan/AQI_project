@@ -99,7 +99,7 @@ elif page == "📄 Download Report":
     st.title("📄 Download AQI Report")
     if st.session_state.prediction:
         data = st.session_state.input_values
-        report = f\"\"\"
+        report = f"""
 Air Quality Prediction Report
 -----------------------------
 PM2.5: {data['PM2.5']} µg/m³
@@ -113,7 +113,7 @@ O3: {data['O3']} µg/m³
 Predicted AQI: {st.session_state.prediction}
 Category: {data['category']}
 Advice: {data['advice']}
-        \"\"\"
+        """
         buffer = io.StringIO()
         buffer.write(report)
         buffer.seek(0)
